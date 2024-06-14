@@ -1,4 +1,5 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
+#include <fstream>
 using namespace std;
 
 // Function to trim leading whitespace
@@ -23,117 +24,92 @@ std::vector<std::string> split(const std::string &s, char delimiter) {
     std::vector<std::string> tokens;
     std::string token;
     std::stringstream ss(s);
-    
     while (std::getline(ss, token, delimiter)) {
         tokens.push_back(token);
     }
-    
     return tokens;
 }
 
-void solve()
-{
-    int n = 5;
-    unordered_map<int, unordered_map<string, int>> mp;
-    for(int i=0;i<n;i++)
-    {
-        string str;
-        cin>>str;
-
-        cout<<"String: "<<str<<endl;
-
-        // char str[100000];
-        // cin.getline(str, 100000);
-        // char *ptr; // declare a pointer for storing splitted words
-        
-        // ptr = strtok(str, ";");
-
-        vector<string> str_vec = split(str,';');
-
-        for(auto ptr: str_vec)
-        {
-            cout<<ptr<<" ";
-            // ptr = strtok(NULL, ";");
+void solve() {
+    std::ifstream inputFile("input.txt");
+    std::string line;
+    vector<string> strs;
+    if (inputFile.is_open()) {
+        while (std::getline(inputFile, line)) {
+            // Process each line
+            strs.push_back(line);
         }
-        cout<<endl;
+        inputFile.close();
+    } else {
+        std::cout << "Unable to open file" << std::endl;
+    }
 
+    int n = strs.size();
+    unordered_map<int, unordered_map<string, vector<int>>> mp;
+
+    for (int i = 0; i < n; i++) {
+        string s = strs[i];
+        vector<string> str_vec = split(s, ';');
         string first = str_vec[0];
-        string game = "";
-        int j = 0;
-        while(first[j] != ':')
-        {
-            game += first[j];
-            j++;
-        }
-
-        str_vec[0] = first.substr(j+2);
-
-        unordered_map<string, int> mp2;
-        for(auto it: str_vec)
-        {
+        vector<string> games = split(first, ':');
+        str_vec[0] = trim(games[1]);
+        string game = games[0];
+        unordered_map<string, vector<int>> mp2;
+        for (auto it : str_vec) {
             vector<string> splt = split(it, ',');
-            for(int i=0;i<splt.size();i++)
-            {
-                string sss = trim(splt[i]);
+            for (int j = 0; j < splt.size(); j++) {
+                string sss = trim(splt[j]);
                 int index = 0;
-                while(sss[index] != 32)
-                {
+                while (sss[index] != 32) {
                     index++;
                 }
-
-                mp2[sss.substr(index+1)] += stoi(sss.substr(0, index));
+                mp2[sss.substr(index + 1)].push_back(stoi(sss.substr(0, index)));
             }
         }
-
-        for(auto it: mp2)
-        {
-
-            cout<<it.first<<" "<<it.second<<endl;
-        }
-
         mp[stoi(game.substr(5))] = mp2;
-
     }
 
     int ans = 0;
-    for(auto it: mp)
-    {
-        bool canadd = false;
-        for(auto it2: it.second)
-        {
-            if(it2.first == "red")
-            {
-                if(it2.second <= 12)
-                    canadd = true;
-                else
-                    canadd = false;
+    for (auto it : mp) {
+        bool canadd = true;
+        for (auto it2 : it.second) {
+            if (it2.first == "red") {
+                for (auto it3 : it2.second) {
+                    if (it3 > 12) {
+                        canadd = false;
+                        break;
+                    }
+                }
+                if (!canadd) break;
             }
-            if(it2.first == "green")
-            {
-                if(it2.second <= 13)
-                    canadd = true;
-                else
-                    canadd = false;
+            if (it2.first == "green") {
+                for (auto it3 : it2.second) {
+                    if (it3 > 13) {
+                        canadd = false;
+                        break;
+                    }
+                }
+                if (!canadd) break;
             }
-            if(it2.first == "blue")
-            {
-                if(it2.second <= 14)
-                    canadd = true;
-                else
-                    canadd = false;
+            if (it2.first == "blue") {
+                for (auto it3 : it2.second) {
+                    if (it3 > 14) {
+                        canadd = false;
+                        break;
+                    }
+                }
+                if (!canadd) break;
             }
         }
-
-        if(canadd)
+        if (canadd) {
+            cout << "Game: " << it.first << endl;
             ans += it.first;
+        }
     }
-
-    cout<<"Ans: "<<ans<<endl;
-
+    cout << "Ans: " << ans << endl;
 }
 
-int main()
-{
+int main() {
     solve();
     return 0;
 }
